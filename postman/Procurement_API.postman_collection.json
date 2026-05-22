@@ -1,0 +1,215 @@
+{
+  "info": {
+    "name": "Procurement API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Get Token (storekeeper)",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "var json = pm.response.json();",
+                "if (json.access) { pm.environment.set('token', json.access); }"
+              ],
+              "type": "text/javascript"
+            }
+          }],
+          "request": {
+            "auth": {"type": "noauth"},
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\"username\": \"storekeeper\", \"password\": \"testpass123\"}"},
+            "url": "{{base_url}}/api/token/"
+          }
+        },
+        {
+          "name": "Get Token (purchaser)",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": ["var j=pm.response.json(); if(j.access) pm.environment.set('token', j.access);"],
+              "type": "text/javascript"
+            }
+          }],
+          "request": {
+            "auth": {"type": "noauth"},
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\"username\": \"purchaser\", \"password\": \"testpass123\"}"},
+            "url": "{{base_url}}/api/token/"
+          }
+        },
+        {
+          "name": "Get Token (manager)",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": ["var j=pm.response.json(); if(j.access) pm.environment.set('token', j.access);"],
+              "type": "text/javascript"
+            }
+          }],
+          "request": {
+            "auth": {"type": "noauth"},
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\"username\": \"manager\", \"password\": \"testpass123\"}"},
+            "url": "{{base_url}}/api/token/"
+          }
+        },
+        {
+          "name": "Unauthorized - Products without token",
+          "request": {
+            "auth": {"type": "noauth"},
+            "method": "GET",
+            "url": "{{base_url}}/api/products/"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Requests",
+      "item": [
+        {
+          "name": "Create Request (storekeeper)",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\"product\": 1, \"quantity\": 5, \"desired_date\": \"2026-06-15\"}"},
+            "url": "{{base_url}}/api/requests/"
+          }
+        },
+        {
+          "name": "List Requests",
+          "request": {"method": "GET", "url": "{{base_url}}/api/requests/"}
+        },
+        {
+          "name": "Accept Request (purchaser)",
+          "request": {
+            "method": "PATCH",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\"status\": \"accepted\"}"},
+            "url": "{{base_url}}/api/requests/1/"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "item": [
+        {
+          "name": "Create Order - bad supplier (422)",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\"request\": 1, \"supplier\": 3, \"amount\": \"1000.00\"}"},
+            "url": "{{base_url}}/api/orders/"
+          }
+        },
+        {
+          "name": "Create Order - good supplier",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\"request\": 2, \"supplier\": 1, \"amount\": \"12000.00\"}"},
+            "url": "{{base_url}}/api/orders/"
+          }
+        },
+        {
+          "name": "Create Order - forbidden for storekeeper",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\"request\": 1, \"supplier\": 1, \"amount\": \"1000.00\"}"},
+            "url": "{{base_url}}/api/orders/"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Finance",
+      "item": [
+        {
+          "name": "Create Accountable Request",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\"order\": 1, \"amount\": \"15000.00\", \"due_date\": \"2026-06-30\"}"},
+            "url": "{{base_url}}/api/accountable-requests/"
+          }
+        },
+        {
+          "name": "Approve Accountable Request (manager)",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\"decision\": \"approved\", \"comment\": \"Согласовано\"}"},
+            "url": "{{base_url}}/api/accountable-requests/1/approve/"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Warehouse",
+      "item": [
+        {
+          "name": "Register Invoice",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\"order\": 1, \"invoice_number\": \"INV-002\", \"document_date\": \"2026-05-20\"}"},
+            "url": "{{base_url}}/api/invoices/"
+          }
+        },
+        {
+          "name": "Create Acceptance",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\"invoice\": 1}"},
+            "url": "{{base_url}}/api/acceptances/"
+          }
+        },
+        {
+          "name": "Quantity Check",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\"acceptance\": 1, \"product\": 1, \"declared_quantity\": 10, \"actual_quantity\": 8}"},
+            "url": "{{base_url}}/api/quantity-checks/"
+          }
+        },
+        {
+          "name": "Serial Check",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\"acceptance\": 1, \"product\": 1, \"serial_number\": \"SN-001\"}"},
+            "url": "{{base_url}}/api/serial-checks/"
+          }
+        },
+        {
+          "name": "Deviation",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\"acceptance\": 1, \"deviation_type\": \"underdelivery\", \"description\": \"Недовложение 2 шт\"}"},
+            "url": "{{base_url}}/api/deviations/"
+          }
+        },
+        {
+          "name": "List Deviations (accountant)",
+          "request": {"method": "GET", "url": "{{base_url}}/api/deviations/"}
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+Django==4.2
+djangorestframework==3.14
+djangorestframework-simplejwt==5.3
+psycopg2-binary==2.9.9
+drf-spectacular==0.26
+django-cors-headers==4.3
+django-filter==23.5
